@@ -28,6 +28,7 @@ public class ServerThread extends Thread{
             System.out.println(inputLine);
             System.out.println("process start");
             outputLine = processInput(inputLine);
+            System.out.print("Output Line: "+outputLine);
             System.out.println(outputLine);
             out.println(outputLine);
             socket.close();
@@ -65,9 +66,30 @@ public class ServerThread extends Thread{
         } else if (patientString.startsWith("new:")){
             patientString=patientString.substring(4,patientString.length());
             output=processPatientNewLogin(patientString);
+        } else if (patientString.startsWith("login:")){
+            patientString=patientString.substring(6, patientString.length());
+            output=processPatientLogin(patientString);
         }
         return output;
     }
+
+    private String processPatientLogin(String patientString){
+        patientString=decryptString(patientString);
+        try{
+            Person person = (Person) fromStringDecoder(patientString);
+            Patient patient = new Patient(person);
+            String location = patient.getFilePath();
+            Patient patientData= new Patient();
+            patientData.getPatientData(location);
+            String encoded = toStringEncoder(patientString);
+            System.out.println("Encoded: "+encoded);
+            return encryptString(encoded);
+        } catch (Exception e){
+            System.out.println(e.toString());
+            return "false";
+        }
+    }
+
 
     public String processPatientNewLogin(String patientString){
         String output="";
@@ -102,6 +124,12 @@ public class ServerThread extends Thread{
         System.out.println("Exists: "+output);
 
         return output;
+    }
+
+    private String encryptString(String x){
+        BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+        textEncryptor.setPassword(encryptionKey());
+        return textEncryptor.encrypt(x);
     }
 
     private static String decryptString(String x) {
@@ -166,7 +194,11 @@ public class ServerThread extends Thread{
     }
 
     //Takes Data and key to encrypt data with. key is patients password or practice users password
-    public String toStringEncoder(String data, String key){
-        return "";
+    public String toStringEncoder(Object o) throws IOException{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(o);
+        oos.close();
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
 }

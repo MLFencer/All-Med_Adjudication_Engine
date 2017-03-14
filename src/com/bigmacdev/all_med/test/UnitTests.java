@@ -9,7 +9,9 @@ import java.io.File;
 public class UnitTests {
 
 	public static void main(String[] args) {
-		System.out.println(testCreatePatient());
+		//System.out.println(testCreatePatient());
+		//System.out.println(testLatestFileName());
+
 		/*try {
 			new File("test/test/test").mkdirs();
 			new File("test/test/test/test.txt").createNewFile();
@@ -17,12 +19,47 @@ public class UnitTests {
 			e.printStackTrace();
 		}*/
 
-		String unEncryptedString = "";
-		String encryptedString= testEncryptionCreation(unEncryptedString);
-		System.out.println(encryptedString);
-		System.out.println(testEncryptionDecryption(encryptedString));
+		String toEncrypt = "michael";
+		String e1,e2,e3,e4,e5;
+		e1=createHashTest(toEncrypt,toEncrypt);
+		e2=createHashTest(toEncrypt,toEncrypt);
+		e3=createHashTest(toEncrypt,toEncrypt);
+		e4=createHashTest(toEncrypt,toEncrypt);
+		e5=createHashTest(toEncrypt,toEncrypt);
+		System.out.println("Encrypted 1: "+e1);
+		System.out.println("Encrypted 2: "+e2);
+		System.out.println("Encrypted 3: "+e3);
+		System.out.println("Encrypted 4: "+e4);
+		System.out.println("Encrypted 5: "+e5);
+		System.out.println("Equal 1: "+toEncrypt.equals(decryptHashTest(e1,toEncrypt)));
+		System.out.println("Equal 2: "+toEncrypt.equals(decryptHashTest(e2,toEncrypt)));
+		System.out.println("Equal 3: "+toEncrypt.equals(decryptHashTest(e3,toEncrypt)));
+		System.out.println("Equal 4: "+toEncrypt.equals(decryptHashTest(e4,toEncrypt)));
+		System.out.println("Equal 5: "+toEncrypt.equals(decryptHashTest(e5,toEncrypt)));
+
+		//String unEncryptedString = "";
+		//String encryptedString= testEncryptionCreation(unEncryptedString);
+		//System.out.println(encryptedString);
+		//System.out.println(testEncryptionDecryption(encryptedString));
 
 
+	}
+
+	private static String createHashTest(String s, String k){
+		BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+		textEncryptor.setPassword(k);
+		return textEncryptor.encrypt(s);
+	}
+
+	private static String decryptHashTest(String s, String k){
+		BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+		textEncryptor.setPassword(k);
+		return textEncryptor.decrypt(s);
+	}
+
+	private static String testLatestFileName(){
+		Patient pt = new Patient("Bob","Test",1905,3,1);
+		return pt.getLatestRecord(pt.getFilePath());
 	}
 
 	private static String testEncryptionDecryption(String x){
@@ -47,7 +84,7 @@ public class UnitTests {
 
 	private static String encryptionKey(){
 		Long unixTime = System.currentTimeMillis()/1000000;
-		System.out.println(""+unixTime);
+		//System.out.println(""+unixTime);
 		String keyGenSeed = unixTime+"";
 		String output="";
 		String keyGenSeedStart=keyGenSeed;

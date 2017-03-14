@@ -9,6 +9,8 @@ public class Person implements Serializable{
 	protected String fName="", mName="", lName="";
 	protected int dobY=0, dobM=0, dobD=0;
 
+	public Person(){}
+
 	public Person(String f, String l, int y, int m, int d){
 		fName=f;
 		lName=l;
@@ -32,10 +34,6 @@ public class Person implements Serializable{
 	public int getDobD() {return dobD;}
 	public String getlName() {return lName;}
 	public String getName(){return lName+"_"+fName;}
-
-	public void createFileStructure(){
-		new File("data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+getName()).mkdirs();
-	}
 
 	public boolean fileExists(){
 		return new File("data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+getName()).exists();
