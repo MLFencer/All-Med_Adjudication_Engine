@@ -17,11 +17,10 @@ public class UnitTests {
 			e.printStackTrace();
 		}*/
 
-		String unEncryptedString = "¬í \u0005sr \fmodel.Person5è\n" +
-				"¥NI\u0090z\u0002 \u0006I \u0004dobDI \u0004dobMI \u0004dobYL \u0005fNamet \u0012Ljava/lang/String;L \u0005lNameq ~ \u0001L \u0005mNameq ~ \u0001xp   \u0004   \u0005  \u0007Ét \u0003bobt \u0004testp";
-		//String encryptedString= testEncryptionCreation(unEncryptedString);
-		//System.out.println(encryptedString);
-		//System.out.println(testEncryptionDecryption(encryptedString));
+		String unEncryptedString = "";
+		String encryptedString= testEncryptionCreation(unEncryptedString);
+		System.out.println(encryptedString);
+		System.out.println(testEncryptionDecryption(encryptedString));
 
 
 	}

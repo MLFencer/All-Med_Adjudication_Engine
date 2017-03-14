@@ -8,6 +8,7 @@ public class Person implements Serializable{
 
 	protected String fName, mName, lName;
 	protected int dobY, dobM, dobD;
+	private String password;
 	
 	public Person(String f, String l, int y, int m, int d){
 		fName=f;
@@ -24,6 +25,8 @@ public class Person implements Serializable{
 		dobD=d;
 		mName=mn;
 	}
+	public String getPassword(){return password;}
+	public void setPassword(String password){this.password=password;}
 	public String getfName(){
 		return fName;
 	}
