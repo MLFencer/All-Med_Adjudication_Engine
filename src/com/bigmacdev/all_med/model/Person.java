@@ -6,10 +6,9 @@ public class Person implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 
-	protected String fName, mName, lName;
-	protected int dobY, dobM, dobD;
-	private String password;
-	
+	protected String fName="", mName="", lName="";
+	protected int dobY=0, dobM=0, dobD=0;
+
 	public Person(String f, String l, int y, int m, int d){
 		fName=f;
 		lName=l;
@@ -25,8 +24,6 @@ public class Person implements Serializable{
 		dobD=d;
 		mName=mn;
 	}
-	public String getPassword(){return password;}
-	public void setPassword(String password){this.password=password;}
 	public String getfName(){
 		return fName;
 	}
@@ -36,7 +33,7 @@ public class Person implements Serializable{
 	public String getlName() {return lName;}
 	public String getName(){return lName+"_"+fName;}
 
-	public void createFile(){
+	public void createFileStructure(){
 		new File("data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+getName()).mkdirs();
 	}
 

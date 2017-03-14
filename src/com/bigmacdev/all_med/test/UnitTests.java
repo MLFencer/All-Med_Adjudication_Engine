@@ -9,7 +9,7 @@ import java.io.File;
 public class UnitTests {
 
 	public static void main(String[] args) {
-		//System.out.println(testCreatePatient());
+		System.out.println(testCreatePatient());
 		/*try {
 			new File("test/test/test").mkdirs();
 			new File("test/test/test/test.txt").createNewFile();
@@ -33,7 +33,7 @@ public class UnitTests {
 
 	private static String testCreatePatient(){
 		Patient pt = new Patient("Bob","Test",1905,3,1);
-		pt.createPatient();
+		pt.createFile();
 		return (""+new File(pt.getFilePath()).exists());
 	}
 

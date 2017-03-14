@@ -62,8 +62,8 @@ public class ServerThread extends Thread{
             patientString=patientString.substring(6,patientString.length());
             System.out.println("processPatient: sub: "+patientString);
             output=processPatientCheckLogin(patientString);
-        } else if (patientString.startsWith("new")){
-            patientString=patientString.substring(3,patientString.length());
+        } else if (patientString.startsWith("new:")){
+            patientString=patientString.substring(4,patientString.length());
             output=processPatientNewLogin(patientString);
         }
         return output;
@@ -72,8 +72,9 @@ public class ServerThread extends Thread{
     public String processPatientNewLogin(String patientString){
         String output="";
         try{
-            Person person = (Person) fromStringDecoder(patientString);
-            Patient patient = new Patient(person);
+            patientString=decryptString(patientString);
+            Patient patient = (Patient) fromStringDecoder(patientString);
+            patient.createFile();
 
         }catch (Exception e){
             System.out.println(e);

@@ -10,13 +10,18 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-public class Patient extends Person{
+public class Patient extends Person implements Serializable{
+
+	private static final long serialVersionUID = 2L;
 
 	ArrayList<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
 	ArrayList<Practice> approvedPractices = new ArrayList<Practice>();
-	
-	String jsonString;
+	private String jsonString;
+	private String password="";
 
+
+	public String getPassword(){return password;}
+	public void setPassword(String password){this.password=password;}
 	public Patient(Person p){
 		super(p.getfName(),p.getlName(),p.getDobY(),p.getDobM(),p.getDobD());
 	}
@@ -25,30 +30,19 @@ public class Patient extends Person{
 		super(f,l,y,m,d);
 	}
 
-	//Get patients password
-	public String getPassword(){
-		return "";
-	}
-
-	//Get patients data
-	public String getData(){
-		return "";
-	}
-	
 	//Try to create patient, if fail return false, if succeed then return true;
-	public boolean createPatient(){
+	public boolean createFile(){
 		DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
 		Date date = new Date();
 		String dateString=dateFormat.format(date);
-		createFile();
+		//createFileStructure();
 		try{
-			if(!new File("data/patient/"+dobY+"/"+dobM+"/"+dobD).exists()){
-				new File("data/patient/"+dobY+"/"+dobM+"/"+dobD).mkdirs();
+			if(!new File(getFilePath()).exists()){
+				new File(getFilePath()).mkdirs();
 			}
-			File file= new File("data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+getName());
-			file.mkdirs();
-			new File("data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+getName()+"/"+dateString+".txt").createNewFile();
+			new File(getFilePath()+"/"+dateString+".txt").createNewFile();
 			JsonObject jObject = Json.createObjectBuilder()
+					.add("password",password)
 					.add("personal_info", Json.createObjectBuilder()
 						.add("name", Json.createObjectBuilder()
 							.add("first", fName)
@@ -61,7 +55,7 @@ public class Patient extends Person{
 							.add("year", dobY)
 						)
 					).build();
-			PrintStream out = new PrintStream(new FileOutputStream("data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+getName()+"/"+dateString+".txt"));
+			PrintStream out = new PrintStream(new FileOutputStream(getFilePath()+"/"+dateString+".txt"));
 			out.print(jObject);
 		}catch(Exception e){
 			System.out.println(e);
