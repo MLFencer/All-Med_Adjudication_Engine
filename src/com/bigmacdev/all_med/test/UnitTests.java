@@ -11,6 +11,7 @@ public class UnitTests {
 	public static void main(String[] args) {
 		//System.out.println(testCreatePatient());
 		//System.out.println(testLatestFileName());
+		testReadFile();
 
 		/*try {
 			new File("test/test/test").mkdirs();
@@ -18,7 +19,7 @@ public class UnitTests {
 		}catch (Exception e){
 			e.printStackTrace();
 		}*/
-
+/*
 		String toEncrypt = "michael";
 		String e1,e2,e3,e4,e5;
 		e1=createHashTest(toEncrypt,toEncrypt);
@@ -35,7 +36,7 @@ public class UnitTests {
 		System.out.println("Equal 2: "+toEncrypt.equals(decryptHashTest(e2,toEncrypt)));
 		System.out.println("Equal 3: "+toEncrypt.equals(decryptHashTest(e3,toEncrypt)));
 		System.out.println("Equal 4: "+toEncrypt.equals(decryptHashTest(e4,toEncrypt)));
-		System.out.println("Equal 5: "+toEncrypt.equals(decryptHashTest(e5,toEncrypt)));
+		System.out.println("Equal 5: "+toEncrypt.equals(decryptHashTest(e5,toEncrypt))); */
 
 		//String unEncryptedString = "";
 		//String encryptedString= testEncryptionCreation(unEncryptedString);
@@ -43,6 +44,15 @@ public class UnitTests {
 		//System.out.println(testEncryptionDecryption(encryptedString));
 
 
+	}
+
+	private static void testReadFile(){
+		Patient pt = new Patient("michael","lott",1995,8,14);
+		String s1 = pt.getFilePath();
+		System.out.println(s1);
+		String s2 = pt.getLatestRecord(s1);
+		System.out.println(s2);
+		pt.getPatientData(s1);
 	}
 
 	private static String createHashTest(String s, String k){

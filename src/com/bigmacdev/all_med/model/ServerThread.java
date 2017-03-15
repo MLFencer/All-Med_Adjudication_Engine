@@ -1,6 +1,8 @@
 package com.bigmacdev.all_med.model;
 
 import com.bigmacdev.all_med.controller.Main;
+import net.maritimecloud.internal.core.javax.json.Json;
+import net.maritimecloud.internal.core.javax.json.JsonObject;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 import java.io.*;
@@ -76,14 +78,12 @@ public class ServerThread extends Thread{
     private String processPatientLogin(String patientString){
         patientString=decryptString(patientString);
         try{
-            Person person = (Person) fromStringDecoder(patientString);
-            Patient patient = new Patient(person);
+            Patient patient = new Patient();
+            patient.loadData(Json.createReader(new StringReader(patientString)).readObject());
             String location = patient.getFilePath();
             Patient patientData= new Patient();
-            patientData.getPatientData(location);
-            String encoded = toStringEncoder(patientString);
-            System.out.println("Encoded: "+encoded);
-            return encryptString(encoded);
+            JsonObject jo = patientData.getPatientData(location);
+            return encryptString(jo.toString());
         } catch (Exception e){
             System.out.println(e.toString());
             return "false";

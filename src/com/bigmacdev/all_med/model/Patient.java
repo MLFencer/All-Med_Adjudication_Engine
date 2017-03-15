@@ -68,6 +68,7 @@ public class Patient extends Person implements Serializable{
 					).build();
 			PrintStream out = new PrintStream(new FileOutputStream(getFilePath()+"/"+dateString+".txt"));
 			out.print(jObject);
+			out.close();
 		}catch(Exception e){
 			System.out.println(e);
 			e.printStackTrace();
@@ -77,28 +78,38 @@ public class Patient extends Person implements Serializable{
 	}
 	//-------------------------------
 
-	//----Get Data------------------
-	public void getPatientData(String location){
+	//----Get Data As Json------------------
+	public JsonObject getPatientData(String location){
 		location=location+"/"+getLatestRecord(location);
 		File inputFile = new File(location);
 		InputStream inputStream;
+		JsonObject jo=null;
 		try{
 			inputStream = new FileInputStream(inputFile);
 			JsonReader reader = Json.createReader(inputStream);
-			JsonObject jo = reader.readObject();
+			jo = reader.readObject();
 			reader.close();
-			password=jo.getString("password");
-			JsonObject personalInfo = jo.getJsonObject("personal_info");
-			JsonObject name = personalInfo.getJsonObject("name");
-			fName=name.getString("first");
-			lName=name.getString("last");
-			JsonObject dob = personalInfo.getJsonObject("dob");
-			dobD=dob.getInt("day");
-			dobM=dob.getInt("month");
-			dobY=dob.getInt("year");
+			inputStream.close();
+			return jo;
+
 		}catch (Exception e){
 			System.out.println(e);
+			return jo;
+
 		}
+	}
+
+	//----Get Convert Data from Json to Object----
+	public void loadData(JsonObject jo){
+		password=jo.getString("password");
+		JsonObject personalInfo = jo.getJsonObject("personal_info");
+		JsonObject name = personalInfo.getJsonObject("name");
+		fName=name.getString("first");
+		lName=name.getString("last");
+		JsonObject dob = personalInfo.getJsonObject("dob");
+		dobD=dob.getInt("day");
+		dobM=dob.getInt("month");
+		dobY=dob.getInt("year");
 	}
 
 	//----Get Most Recent Patient Record------------------
