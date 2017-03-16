@@ -78,6 +78,23 @@ public class Patient extends Person implements Serializable{
 	}
 	//-------------------------------
 
+	//--------Write Json Data to file---------
+	public boolean writeJsonToFile(JsonObject jo){
+		DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
+		Date date = new Date();
+		String dateString=dateFormat.format(date);
+		try {
+			new File(getFilePath() + "/" +dateString+".txt").createNewFile();
+			PrintStream out = new PrintStream(new FileOutputStream(getFilePath()+"/"+dateString+".txt"));
+			out.print(jo);
+			out.close();
+			return true;
+		}catch (Exception e){
+			return false;
+		}
+	}
+	//----------------------------------------
+
 	//----Get Data As Json------------------
 	public JsonObject getPatientData(String location){
 		location=location+"/"+getLatestRecord(location);
