@@ -43,11 +43,14 @@ public class Main {
         String[] folderNames = {
                 "patient",
                 "doctor",
-                "practice"
+                "clinic",
+                "pharmacy"
         };
-        new File("data").mkdir();
         for (int i=0; i<folderNames.length;i++){
-            new File("data/"+folderNames[i]).mkdir();
+            new File("storage/data/"+folderNames[i]).mkdirs();
         }
+        new File("storage/login/patient").mkdirs();
+        new File("storage/login/clinic").mkdirs();
+        new File("storage/login/pharmacy").mkdirs();
     }
 }

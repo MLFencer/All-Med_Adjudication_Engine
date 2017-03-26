@@ -30,8 +30,10 @@ public class ServerThread extends Thread{
             System.out.println(inputLine);
             System.out.println("process start");
             outputLine = processInput(inputLine);
-            System.out.print("Output Line: "+outputLine);
-            System.out.println(outputLine);
+            try {
+                sleep(10000);
+            }catch (Exception e){e.printStackTrace();}
+            System.out.println("Output Line: "+outputLine);
             out.println(outputLine);
             socket.close();
         }catch (IOException e){
@@ -61,33 +63,54 @@ public class ServerThread extends Thread{
 
     public String processPatient(String patientString){
         String output="";
-        if (patientString.startsWith("check:")){
-            patientString=patientString.substring(6,patientString.length());
-            System.out.println("processPatient: sub: "+patientString);
-            output=processPatientCheckLogin(patientString);
-        } else if (patientString.startsWith("new:")){
+        if (patientString.startsWith("new:")){
             patientString=patientString.substring(4,patientString.length());
             output=processPatientNewLogin(patientString);
         } else if (patientString.startsWith("login:")){
             patientString=patientString.substring(6, patientString.length());
             output=processPatientLogin(patientString);
+        }else if (patientString.startsWith("check:")) {
+            patientString = patientString.substring(6, patientString.length());
+            output = processCheckUsername(patientString);
         }
         return output;
     }
 
-    private String processPatientLogin(String patientString){
-        patientString=decryptString(patientString);
+    private String processCheckUsername(String input){
+        input=decryptString(input);
+        Login login = new Login();
         try{
-            Patient patient = new Patient();
-            patient.loadData(Json.createReader(new StringReader(patientString)).readObject());
-            String location = patient.getFilePath();
-            Patient patientData= new Patient();
-            JsonObject jo = patientData.getPatientData(location);
-            return encryptString(jo.toString());
-        } catch (Exception e){
-            System.out.println(e.toString());
+            login.loadLoginData(Json.createReader(new StringReader(input)).readObject());
+            String location = "storage/login/patient/"+login.getUsername();
+            System.out.println(login.getUsername());
+            if(new File(location).exists()){
+                return "true";
+            }else {
+                new File(location).mkdirs();
+                return "false";
+            }
+        }catch (Exception e){
+            e.printStackTrace();
             return "false";
         }
+    }
+
+    private String processPatientLogin(String patientString){
+        patientString=decryptString(patientString);
+        System.out.println(patientString);
+        try{
+            Login login = new Login();
+            login.loadLoginData(Json.createReader(new StringReader(patientString)).readObject());
+            String location = "storage/login/patient/"+login.getUsername();
+            System.out.println(login.getUsername());
+            if(new File(location).exists()){
+                JsonObject jo = login.readLoginData(location);
+                return encryptString(jo.toString());
+            }
+        } catch (Exception e){
+            System.out.println(e.toString());
+        }
+        return "false";
     }
 
 
@@ -101,28 +124,6 @@ public class ServerThread extends Thread{
         }catch (Exception e){
             System.out.println(e);
         }
-        return output;
-    }
-
-    public String processPatientCheckLogin(String patientString){
-        String output="";
-        try {
-            patientString = decryptString(patientString);
-            System.out.println("decrypted: "+patientString);
-            Person person = (Person) fromStringDecoder(patientString);
-            System.out.println("Object deserialized: "+person.getName());
-            if(person.fileExists()){
-                output="true";
-            } else {
-                output="false";
-            }
-
-        }catch(Exception e){
-            System.out.println(e);
-        }
-
-        System.out.println("Exists: "+output);
-
         return output;
     }
 
