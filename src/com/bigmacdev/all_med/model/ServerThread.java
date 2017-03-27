@@ -30,9 +30,6 @@ public class ServerThread extends Thread{
             System.out.println(inputLine);
             System.out.println("process start");
             outputLine = processInput(inputLine);
-            try {
-                sleep(10000);
-            }catch (Exception e){e.printStackTrace();}
             System.out.println("Output Line: "+outputLine);
             out.println(outputLine);
             socket.close();
@@ -60,6 +57,8 @@ public class ServerThread extends Thread{
         }
         return output;
     }
+
+    //----- Process Patient Requests---------------
 
     public String processPatient(String patientString){
         String output="";
@@ -118,14 +117,24 @@ public class ServerThread extends Thread{
         String output="";
         try{
             patientString=decryptString(patientString);
-            Patient patient = (Patient) fromStringDecoder(patientString);
+            Patient patient = new Patient();
+            patient.loadData(Json.createReader(new StringReader(patientString)).readObject());
             patient.createFile();
+            Login log = new Login();
+            log.setLogin(patient.getUsername(),patient.getPassword());
+            log.setLocation(patient.getFilePath());
+            log.writeJsonToFile();
+            output="true";
 
         }catch (Exception e){
             System.out.println(e);
+            output="false";
         }
         return output;
     }
+
+
+   //--------Encryption Beyond this point--------------------
 
     private String encryptString(String x){
         BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
@@ -185,21 +194,4 @@ public class ServerThread extends Thread{
         return output+keyGenSeedStart+output;
     }
 
-    public Object fromStringDecoder(String s) throws IOException, ClassNotFoundException{
-        String rectifiedString = s.replace("\\","");
-        byte [] data = Base64.getUrlDecoder().decode(rectifiedString);
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-        Object o = ois.readObject();
-        ois.close();
-        return o;
-    }
-
-    //Takes Data and key to encrypt data with. key is patients password or practice users password
-    public String toStringEncoder(Object o) throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(o);
-        oos.close();
-        return Base64.getEncoder().encodeToString(baos.toByteArray());
-    }
 }

@@ -38,8 +38,4 @@ public class Person implements Serializable{
 	public boolean fileExists(){
 		return new File("data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+getName()).exists();
 	}
-
-	public String getFilePath(){
-		return "data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+getName();
-	}
 }

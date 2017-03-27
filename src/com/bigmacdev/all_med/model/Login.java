@@ -5,9 +5,10 @@ import net.maritimecloud.internal.core.javax.json.JsonObject;
 import net.maritimecloud.internal.core.javax.json.JsonObjectBuilder;
 import net.maritimecloud.internal.core.javax.json.JsonReader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -58,6 +59,21 @@ public class Login {
 
     public String getUsername(){
         return username;
+    }
+
+    public boolean writeJsonToFile(){
+        DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
+        Date date = new Date();
+        String dateString=dateFormat.format(date);
+        try{
+            new File("storage/login/patient/"+username+"/"+dateString+".txt").createNewFile();
+            PrintStream out = new PrintStream(new FileOutputStream("storage/login/patient/"+username+"/"+dateString+".txt"));
+            out.print(toJson());
+            out.close();
+            return true;
+        } catch (Exception e){
+            return false;
+        }
     }
 
     public String toJson(){
