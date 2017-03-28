@@ -111,7 +111,7 @@ public class Patient extends Person implements Serializable{
 
 	//Get File Path
 	public String getFilePath(){
-		return "data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+ssn.substring(ssn.length()-4,ssn.length())+"/"+getName();
+		return "storage/data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+ssn.substring(ssn.length()-4,ssn.length())+"/"+getName();
 	}
 
 	//--------Write Json Data to file---------

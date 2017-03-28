@@ -60,7 +60,7 @@ public class ServerThread extends Thread{
 
     //----- Process Patient Requests---------------
 
-    public String processPatient(String patientString){
+    private String processPatient(String patientString){
         String output="";
         if (patientString.startsWith("new:")){
             patientString=patientString.substring(4,patientString.length());
@@ -71,6 +71,25 @@ public class ServerThread extends Thread{
         }else if (patientString.startsWith("check:")) {
             patientString = patientString.substring(6, patientString.length());
             output = processCheckUsername(patientString);
+        } else if(patientString.startsWith("get:")){
+            patientString=patientString.substring(4,patientString.length());
+            output= processGetRecords(patientString);
+        }
+        return output;
+    }
+
+    private String processGetRecords(String request){
+        String output="";
+        request = decryptString(request);
+        Login login = new Login();
+        try{
+            login.loadLoginData(Json.createReader(new StringReader(request)).readObject());
+            String location = login.getLocation();
+            Patient patient = new Patient();
+            output = encryptString(patient.getPatientData(location).toString());
+        } catch(Exception e){
+            System.out.println(e);
+            output="false";
         }
         return output;
     }
@@ -103,7 +122,7 @@ public class ServerThread extends Thread{
             String location = "storage/login/patient/"+login.getUsername();
             System.out.println(login.getUsername());
             if(new File(location).exists()){
-                JsonObject jo = login.readLoginData(location);
+                JsonObject jo = login.readLoginData(location+"/"+getLatestRecord(location));
                 return encryptString(jo.toString());
             }
         } catch (Exception e){
@@ -192,6 +211,30 @@ public class ServerThread extends Thread{
             }
         }
         return output+keyGenSeedStart+output;
+    }
+
+    //----Get Most Recent Patient Record------------------
+    public String getLatestRecord(String location){
+        File folder = new File(location);
+        File [] listOfFiles = folder.listFiles();
+        String latest=listOfFiles[0].getName();
+        for (int i=1; i<listOfFiles.length; i++){
+            String nameCurrent = listOfFiles[i].getName();
+            int latestDay = Integer.parseInt(latest.substring(0,8));
+            int currentDay = Integer.parseInt(nameCurrent.substring(0,8));
+            int latestTime = Integer.parseInt(latest.substring(10,15));
+            int currentTime = Integer.parseInt(nameCurrent.substring(10,15));
+            if(latestDay>currentDay){
+            } else if(latestDay<currentDay){
+                latest=nameCurrent;
+            }else if (latestDay==currentDay){
+                if(latestTime>currentTime){
+                }else{
+                    latest=nameCurrent;
+                }
+            }
+        }
+        return latest;
     }
 
 }
