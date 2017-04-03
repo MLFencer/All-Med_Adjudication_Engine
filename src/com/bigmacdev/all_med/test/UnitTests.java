@@ -11,7 +11,7 @@ public class UnitTests {
 	public static void main(String[] args) {
 		//System.out.println(testCreatePatient());
 		//System.out.println(testLatestFileName());
-		testReadFile();
+		//testReadFile();
 
 		/*try {
 			new File("test/test/test").mkdirs();

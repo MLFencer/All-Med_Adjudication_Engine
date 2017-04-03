@@ -74,6 +74,24 @@ public class ServerThread extends Thread{
         } else if(patientString.startsWith("get:")){
             patientString=patientString.substring(4,patientString.length());
             output= processGetRecords(patientString);
+        } else if(patientString.startsWith("update:")){
+            output=processUpdatePatient(patientString.substring(7, patientString.length()));
+        }
+        return output;
+    }
+
+    private String processUpdatePatient(String request){
+        String output="false";
+        try{
+            request=decryptString(request);
+            Patient patient = new Patient();
+            System.out.println("Loading Data");
+            patient.loadData(Json.createReader(new StringReader(request)).readObject());
+            System.out.println("Load Data Finished");
+            patient.createAdditionalFile();
+            output="true";
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return output;
     }

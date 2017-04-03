@@ -2,6 +2,7 @@ package com.bigmacdev.all_med.model;
 
 import net.maritimecloud.internal.core.javax.json.Json;
 import net.maritimecloud.internal.core.javax.json.JsonObject;
+import net.maritimecloud.internal.core.javax.json.JsonObjectBuilder;
 import net.maritimecloud.internal.core.javax.json.JsonReader;
 
 import java.io.*;
@@ -15,9 +16,10 @@ public class Patient extends Person implements Serializable{
 
 	private static final long serialVersionUID = 2L;
 
-	ArrayList<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
-	ArrayList<Practice> approvedPractices = new ArrayList<Practice>();
-	private String jsonString;
+	private ArrayList<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
+	private ArrayList<Practice> approvedPractices = new ArrayList<Practice>();
+	private ArrayList<String> changes = new ArrayList<String>();
+	private String path;
 	private String password="";
 	private String gender="";
 	private String username="";
@@ -33,6 +35,7 @@ public class Patient extends Person implements Serializable{
 	private String emergencyContactRelationship="";
 	private String eCHomeNumber="";
 	private String eCCellNumber="";
+	private String changedBy="";
 
 
 	//-----Constructors---------
@@ -91,6 +94,7 @@ public class Patient extends Person implements Serializable{
 	public boolean createFile(){
 		DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
 		Date date = new Date();
+		path=getFilePath();
 		String dateString=dateFormat.format(date);
 		try{
 			if(!new File(getFilePath()).exists()){
@@ -109,6 +113,29 @@ public class Patient extends Person implements Serializable{
 	}
 	//-------------------------------
 
+	//----Make another patient record--------
+	public boolean createAdditionalFile(){
+		DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
+		Date date = new Date();
+		path=getFilePath();
+		String dateString=dateFormat.format(date);
+		try{
+			if(!new File(getFilePath()).exists()){
+				new File(getFilePath()).mkdirs();
+			}
+			new File(getFilePath()+"/"+dateString+".txt").createNewFile();
+			PrintStream out = new PrintStream(new FileOutputStream(getFilePath()+"/"+dateString+".txt"));
+			out.print(toJsonString());
+			out.close();
+		}catch(Exception e){
+			System.out.println(e);
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	//-----------------------------------------
+
 	//Get File Path
 	public String getFilePath(){
 		return "storage/data/patient/"+dobY+"/"+dobM+"/"+dobD+"/"+ssn.substring(ssn.length()-4,ssn.length())+"/"+getName();
@@ -120,7 +147,7 @@ public class Patient extends Person implements Serializable{
 		Date date = new Date();
 		String dateString=dateFormat.format(date);
 		try {
-			new File(getFilePath() + "/" +dateString+".txt").createNewFile();
+			new File(path + "/" +dateString+".txt").createNewFile();
 			PrintStream out = new PrintStream(new FileOutputStream(getFilePath()+"/"+dateString+".txt"));
 			out.print(jo);
 			out.close();
@@ -151,12 +178,19 @@ public class Patient extends Person implements Serializable{
 
 		}
 	}
+	public String toJsonString(){
+		return toJson().toString();
+	}
+
 
 	//-------Create Json------
-	public String toJsonString(){
-		JsonObject jo = Json.createObjectBuilder()
-				.add("username",username)
+	public JsonObject toJson(){
+		JsonObjectBuilder job = Json.createObjectBuilder();
+		JsonObjectBuilder job2 = Json.createObjectBuilder();
+		JsonObjectBuilder job3 = Json.createObjectBuilder();
+		job.add("username",username)
 				.add("password",password)
+				.add("path", path)
 				.add("personal_info", Json.createObjectBuilder()
 						.add("name", Json.createObjectBuilder()
 								.add("first", fName)
@@ -185,20 +219,35 @@ public class Patient extends Person implements Serializable{
 						.add("relationship",emergencyContactRelationship)
 						.add("home",eCHomeNumber)
 						.add("cell",eCCellNumber)
-				)
-				.build();
-		return jo.toString();
+				);
+		try {
+			if (!changedBy.equals("")) {
+				job2.add("updatedBy", changedBy);
+				for (int i = 0; i < changes.size(); i++) {
+					job3.add("field" + i, changes.get(i));
+				}
+				job2.add("fieldsChanged", job3);
+				job.add("changes", job2);
+			}
+		}catch(Exception e){}
+		JsonObject jo = job.build();
+		return jo;
 	}
+
 	//------------------------------
 
 	//----Get Convert Data from Json to Object----
 	public void loadData(JsonObject jo){
 		this.password=jo.getString("password");
 		this.username=jo.getString("username");
+		this.path=jo.getString("path");
 		JsonObject personalInfo = jo.getJsonObject("personal_info");
 		JsonObject name = personalInfo.getJsonObject("name");
 		this.fName=name.getString("first");
 		this.lName=name.getString("last");
+		if(name.containsKey("middle")){
+			this.mName=name.getString("middle");
+		}
 		JsonObject dob = personalInfo.getJsonObject("dob");
 		this.dobD=dob.getInt("day");
 		this.dobM=dob.getInt("month");
@@ -217,6 +266,22 @@ public class Patient extends Person implements Serializable{
 		this.emergencyContactRelationship=contact.getString("relationship");
 		this.eCCellNumber=contact.getString("cell");
 		this.eCHomeNumber=contact.getString("home");
+		if(jo.containsKey("changes")){
+			JsonObject changesObject = jo.getJsonObject("changes");
+			this.changedBy=changesObject.getString("updatedBy");
+			changesObject = changesObject.getJsonObject("fieldsChanged");
+			int i = 0;
+			while (true){
+				System.out.println(changesObject.containsKey("field"+i));
+				if(changesObject.containsKey("field"+i)){
+					changes.add(changesObject.getString("field"+i));
+					System.out.println(changesObject.getString("field"+i));
+				} else {
+					break;
+				}
+				i++;
+			}
+		}
 
 	}
 
