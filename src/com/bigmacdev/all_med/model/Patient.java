@@ -97,9 +97,7 @@ public class Patient extends Person implements Serializable{
 		path=getFilePath();
 		String dateString=dateFormat.format(date);
 		try{
-			if(!new File(getFilePath()).exists()){
-				new File(getFilePath()).mkdirs();
-			}
+			new File(getFilePath()).mkdirs();
 			new File(getFilePath()+"/"+dateString+".txt").createNewFile();
 			PrintStream out = new PrintStream(new FileOutputStream(getFilePath()+"/"+dateString+".txt"));
 			out.print(toJsonString());
@@ -120,9 +118,7 @@ public class Patient extends Person implements Serializable{
 		path=getFilePath();
 		String dateString=dateFormat.format(date);
 		try{
-			if(!new File(getFilePath()).exists()){
-				new File(getFilePath()).mkdirs();
-			}
+			new File(getFilePath()).mkdirs();
 			new File(getFilePath()+"/"+dateString+".txt").createNewFile();
 			PrintStream out = new PrintStream(new FileOutputStream(getFilePath()+"/"+dateString+".txt"));
 			out.print(toJsonString());

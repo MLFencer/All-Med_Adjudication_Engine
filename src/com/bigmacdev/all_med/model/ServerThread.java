@@ -3,11 +3,14 @@ package com.bigmacdev.all_med.model;
 import com.bigmacdev.all_med.controller.Main;
 import net.maritimecloud.internal.core.javax.json.Json;
 import net.maritimecloud.internal.core.javax.json.JsonObject;
+import org.jasypt.util.password.BasicPasswordEncryptor;
+import org.jasypt.util.password.PasswordEncryptor;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.Base64;
+import java.util.SplittableRandom;
 
 public class ServerThread extends Thread{
     private Socket socket = null;
@@ -48,8 +51,8 @@ public class ServerThread extends Thread{
             subInput=(input.substring(8,input.length()));
             System.out.println("processInput: sub: "+subInput);
             output = processPatient(subInput);
-        }else if (input.startsWith("unknown:")){
-
+        }else if (input.startsWith("web:")){
+            output=processWeb(input.substring(4,input.length()));
         }else if (input.startsWith("pharm:")){
 
         }else if (input.startsWith("practice")){
@@ -57,6 +60,79 @@ public class ServerThread extends Thread{
         }
         return output;
     }
+
+    //------Process Web--------------
+    private String processWeb(String request){
+        String output="";
+        if(request.startsWith("pharmacy:")){
+            output=processCreatePharma(request.substring(9,request.length()));
+        }
+        return output;
+    }
+
+    private String processCreatePharma(String request){
+        System.out.println("Request Processing Started");
+        long startTime = System.currentTimeMillis();
+        JsonObject jo = Json.createReader(new StringReader(request)).readObject();
+        JsonObject mJo = jo.getJsonObject("manager");
+        JsonObject pJo = jo.getJsonObject("pharmacy");
+        String name = pJo.getString("name");
+        String phone = pJo.getString("phone");
+        JsonObject lJo = pJo.getJsonObject("location");
+        String street = lJo.getString("street");
+        String city = lJo.getString("city");
+        String state = lJo.getString("state");
+        String zip = lJo.getString("zip");
+
+        System.out.println(mJo.toString());
+
+        String fName = mJo.getString("fname");
+        String lName = mJo.getString("lname");
+        String email = mJo.getString("email");
+        String user = mJo.getString("username");
+        String pass = mJo.getString("password");
+
+       /* try {
+            long eTime1 = System.currentTimeMillis();
+
+            System.out.println("Starting Encryption");
+            BasicPasswordEncryptor passwordEncryptor = new BasicPasswordEncryptor();
+            //BasicTextEncryptor encryptor = new BasicTextEncryptor();
+            System.out.println("Encryptor Created");
+            pass=passwordEncryptor.encryptPassword(pass);
+            //encryptor.setPassword(pass);
+            //System.out.println("Key set");
+            //pass = encryptor.encrypt(pass);
+            System.out.println("Encryption Completed");
+            long eTime2 = System.currentTimeMillis();
+            System.out.println("Encryption time elapsed: "+((eTime2-eTime1)/1000));
+        }catch (Exception e){
+            e.printStackTrace();
+        }*/
+
+        System.out.println("Creating Pharmacy");
+        Pharmacy pharmacy = new Pharmacy(name, street, city, state, zip, phone, user);
+        System.out.println("Pharmacy Created");
+
+        System.out.println(pharmacy.getPath());
+
+        System.out.println("Creating Manager");
+        Staff manager = new Staff(lName,fName,user,pass,email);
+        System.out.println("Manager Created");
+
+        System.out.println(manager.getPath());
+
+        manager.addLocation(pharmacy.getPath());
+
+        System.out.println("File Creation");
+        boolean m = manager.createFile();
+        boolean p = pharmacy.createFile();
+        System.out.println("Files Created");
+        long endTime = System.currentTimeMillis();
+        System.out.println("Time taken: "+((endTime-startTime)/1000));
+        return String.valueOf(m && p);
+    }
+
 
     //----- Process Patient Requests---------------
 
@@ -154,6 +230,7 @@ public class ServerThread extends Thread{
         String output="";
         try{
             patientString=decryptString(patientString);
+            System.out.println(patientString);
             Patient patient = new Patient();
             patient.loadData(Json.createReader(new StringReader(patientString)).readObject());
             patient.createFile();
