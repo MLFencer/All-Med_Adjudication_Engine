@@ -5,6 +5,7 @@ import com.bigmacdev.all_med.model.Patient;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class UnitTests {
 
@@ -12,6 +13,37 @@ public class UnitTests {
 		//System.out.println(testCreatePatient());
 		//System.out.println(testLatestFileName());
 		//testReadFile();
+		/*ArrayList<String> ss = new ArrayList<String>();
+		String s = "type1, type2, type3, type 4";
+		s=s.replaceAll(", ", ",");
+		System.out.println(s);
+		int x = s.indexOf(",");
+		while(x!=s.length()){
+			x = s.indexOf(",");
+			if (x <= 0) {
+				x=s.length();
+			}
+			ss.add(s.substring(0,x));
+			if(x!=s.length()){
+				s=s.substring(x+1,s.length());
+			}
+
+			System.out.println(s);
+		}
+		System.out.println(ss.toString());*/
+
+
+		ArrayList<String> s1 = new ArrayList<String>();
+		ArrayList<String> s2 = new ArrayList<String>();
+		s1.add("abc");
+		s2.add("abc");
+		s1.add("def");
+		s2.add("def");
+		//s1.add("xyz");
+		//s2.add("pqu");
+		System.out.println(s1.equals(s2));
+
+
 
 		/*try {
 			new File("test/test/test").mkdirs();

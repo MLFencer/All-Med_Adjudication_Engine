@@ -16,7 +16,10 @@ public class Patient extends Person implements Serializable{
 
 	private static final long serialVersionUID = 2L;
 
-	private ArrayList<Diagnosis> diagnosis = new ArrayList<Diagnosis>();
+	private ArrayList<String> eyeProblems = new ArrayList<String>();
+	private ArrayList<String> cancers = new ArrayList<String>();
+	private ArrayList<String> stds = new ArrayList<String>();
+	private ArrayList<String> others = new ArrayList<String>();
 	private ArrayList<Practice> approvedPractices = new ArrayList<Practice>();
 	private ArrayList<String> changes = new ArrayList<String>();
 	private String path;
@@ -36,6 +39,25 @@ public class Patient extends Person implements Serializable{
 	private String eCHomeNumber="";
 	private String eCCellNumber="";
 	private String changedBy="";
+	private boolean diabetes = false;
+	private boolean kidneyDisease = false;
+	private boolean stroke = false;
+	private boolean tuberculosis = false;
+	private boolean arrythmia = false;
+	private boolean highBloodPressure = false;
+	private boolean hepatitis = false;
+	private boolean depression = false;
+	private boolean coronaryArteryDisease = false;
+	private boolean asthma = false;
+	private boolean thyroidDisease = false;
+	private boolean emphasyma = false;
+	private boolean congestiveHeartFailure = false;
+	private boolean heartAttack = false;
+	private boolean seizures = false;
+	private boolean eyeProblem = false;
+	private boolean std = false;
+	private boolean cancer = false;
+	private boolean other = false;
 
 
 	//-----Constructors---------
@@ -119,6 +141,7 @@ public class Patient extends Person implements Serializable{
 		String dateString=dateFormat.format(date);
 		try{
 			new File(getFilePath()).mkdirs();
+			new File(getFilePath()+"/scripts/archive").mkdirs();
 			new File(getFilePath()+"/"+dateString+".txt").createNewFile();
 			PrintStream out = new PrintStream(new FileOutputStream(getFilePath()+"/"+dateString+".txt"));
 			out.print(toJsonString());
@@ -184,6 +207,7 @@ public class Patient extends Person implements Serializable{
 		JsonObjectBuilder job = Json.createObjectBuilder();
 		JsonObjectBuilder job2 = Json.createObjectBuilder();
 		JsonObjectBuilder job3 = Json.createObjectBuilder();
+		JsonObjectBuilder job4 = Json.createObjectBuilder();
 		job.add("username",username)
 				.add("password",password)
 				.add("path", path)
@@ -226,6 +250,54 @@ public class Patient extends Person implements Serializable{
 				job.add("changes", job2);
 			}
 		}catch(Exception e){}
+		job4.add("diabetes", diabetes);
+		job4.add("kidneyDisease", kidneyDisease);
+		job4.add("stroke", stroke);
+		job4.add("tuberculosis", tuberculosis);
+		job4.add("arrythmia", arrythmia);
+		job4.add("highBloodPressure", highBloodPressure);
+		job4.add("hepatitis", hepatitis);
+		job4.add("depression", depression);
+		job4.add("coronaryArteryDisease", coronaryArteryDisease);
+		job4.add("asthma", asthma);
+		job4.add("thyroidDisease", thyroidDisease);
+		job4.add("emphasyma", emphasyma);
+		job4.add("congestiveHeartFailure", congestiveHeartFailure);
+		job4.add("seizures", seizures);
+		job4.add("eyeProblem", eyeProblem);
+		job4.add("std", std);
+		job4.add("cancer", cancer);
+		job4.add("other", other);
+
+		if(eyeProblem){
+			JsonObjectBuilder job5 = Json.createObjectBuilder();
+			for(int i=0; i<eyeProblems.size(); i++){
+				job5.add("eyeProblem"+i, eyeProblems.get(i));
+			}
+			job4.add("eyeProblems",job5);
+		}
+		if(std){
+			JsonObjectBuilder job5 = Json.createObjectBuilder();
+			for(int i=0; i<stds.size(); i++){
+				job5.add("std"+i, stds.get(i));
+			}
+			job4.add("stds",job5);
+		}
+		if(cancer){
+			JsonObjectBuilder job5 = Json.createObjectBuilder();
+			for(int i=0; i<cancers.size(); i++){
+				job5.add("cancer"+i, cancers.get(i));
+			}
+			job4.add("cancers",job5);
+		}
+		if(other){
+			JsonObjectBuilder job5 = Json.createObjectBuilder();
+			for(int i=0; i<others.size(); i++){
+				job5.add("other"+i, others.get(i));
+			}
+			job4.add("others",job5);
+		}
+		job.add("conditions",job4);
 		JsonObject jo = job.build();
 		return jo;
 	}
@@ -276,6 +348,75 @@ public class Patient extends Person implements Serializable{
 					break;
 				}
 				i++;
+			}
+		}
+		if(jo.containsKey("conditions")){
+			JsonObject condit = jo.getJsonObject("conditions");
+			this.diabetes=condit.getBoolean("diabetes");
+			this.kidneyDisease=condit.getBoolean("kidneyDisease");
+			this.stroke=condit.getBoolean("stroke");
+			this.tuberculosis=condit.getBoolean("tuberculosis");
+			this.arrythmia=condit.getBoolean("arrythmia");
+			this.highBloodPressure=condit.getBoolean("highBloodPressure");
+			this.hepatitis=condit.getBoolean("hepatitis");
+			this.depression=condit.getBoolean("depression");
+			this.coronaryArteryDisease=condit.getBoolean("coronaryArteryDisease");
+			this.asthma=condit.getBoolean("asthma");
+			this.thyroidDisease=condit.getBoolean("thyroidDisease");
+			this.emphasyma=condit.getBoolean("emphasyma");
+			this.congestiveHeartFailure=condit.getBoolean("congestiveHeartFailure");
+			this.seizures=condit.getBoolean("seizures");
+			this.eyeProblem=condit.getBoolean("eyeProblem");
+			this.std=condit.getBoolean("std");
+			this.cancer=condit.getBoolean("cancer");
+			this.other=condit.getBoolean("other");
+			if(eyeProblem){
+				JsonObject eye = condit.getJsonObject("eyeProblems");
+				int i=0;
+				while (true){
+					if(eye.containsKey("eyeProblem"+i)){
+						eyeProblems.add(eye.getString("eyeProblem"+i));
+					}else{
+						break;
+					}
+					i++;
+				}
+			}
+			if(std){
+				JsonObject sts = condit.getJsonObject("stds");
+				int i=0;
+				while (true){
+					if(sts.containsKey("std"+i)){
+						stds.add(sts.getString("std"+i));
+					}else{
+						break;
+					}
+					i++;
+				}
+			}
+			if(cancer){
+				JsonObject can = condit.getJsonObject("cancers");
+				int i=0;
+				while (true){
+					if(can.containsKey("cancer"+i)){
+						cancers.add(can.getString("cancer"+i));
+					}else{
+						break;
+					}
+					i++;
+				}
+			}
+			if(other){
+				JsonObject oth = condit.getJsonObject("others");
+				int i=0;
+				while (true){
+					if(oth.containsKey("other"+i)){
+						others.add(oth.getString("other"+i));
+					}else{
+						break;
+					}
+					i++;
+				}
 			}
 		}
 

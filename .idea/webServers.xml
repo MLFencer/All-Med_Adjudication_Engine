@@ -2,14 +2,6 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="aed5b5ab-674c-492c-ad29-67869fe961d6" name="Pera-Asteria" url="http://pera-asteria.com">
-        <fileTransfer host="pera-asteria.com" port="22" rootFolder="/home/deploy" accessType="SFTP">
-          <advancedOptions>
-            <advancedOptions dataProtectionLevel="Private" />
-          </advancedOptions>
-          <option name="port" value="22" />
-        </fileTransfer>
-      </webServer>
       <webServer id="d0a981b2-cf0e-475e-b3cc-74452bf2e7fe" name="LocalServer" url="http://10.0.0.34">
         <fileTransfer host="10.0.0.34" port="22" rootFolder="/home/deploy/adjudication" accessType="SFTP">
           <advancedOptions>

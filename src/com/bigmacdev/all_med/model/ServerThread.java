@@ -30,10 +30,10 @@ public class ServerThread extends Thread{
                 ) {
             String inputLine, outputLine;
             inputLine = in.readLine();
-            System.out.println(inputLine);
+            //System.out.println(inputLine);
             System.out.println("process start");
             outputLine = processInput(inputLine);
-            System.out.println("Output Line: "+outputLine);
+            //System.out.println("Output Line: "+outputLine);
             out.println(outputLine);
             socket.close();
         }catch (IOException e){
@@ -44,12 +44,12 @@ public class ServerThread extends Thread{
     }
 
     public String processInput(String input){
-        System.out.println("Processing Started");
+        //System.out.println("Processing Started");
         String output="";
         String subInput;
         if (input.startsWith("patient:")){
             subInput=(input.substring(8,input.length()));
-            System.out.println("processInput: sub: "+subInput);
+            //System.out.println("processInput: sub: "+subInput);
             output = processPatient(subInput);
         }else if (input.startsWith("web:")){
             output=processWeb(input.substring(4,input.length()));
@@ -161,6 +161,7 @@ public class ServerThread extends Thread{
         try{
             request=decryptString(request);
             Patient patient = new Patient();
+            System.out.println(request);
             System.out.println("Loading Data");
             patient.loadData(Json.createReader(new StringReader(request)).readObject());
             System.out.println("Load Data Finished");
