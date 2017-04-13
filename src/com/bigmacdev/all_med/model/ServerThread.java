@@ -55,10 +55,39 @@ public class ServerThread extends Thread{
             output=processWeb(input.substring(4,input.length()));
         }else if (input.startsWith("pharm:")){
 
-        }else if (input.startsWith("practice")){
-
+        }else if (input.startsWith("clinic:")){
+            output=processClinic(input.substring(7, input.length()));
         }
         return output;
+    }
+
+
+    //-----------Process Clinic-------------
+    private String processClinic(String request){
+        String output="";
+        if(request.startsWith("login:")){
+            output=processClinicLogin(request.substring(6, request.length()));
+        }
+        return output;
+    }
+
+    private String processClinicLogin(String request){
+        request = decryptString(request);
+        String out = "";
+        if(new File("storage/login/staff/"+request).exists()){
+            Staff staff = new Staff();
+            staff.loadData("storage/login/staff/"+request);
+            if(staff.hasClinics()){
+                out=staff.jsonToString(staff.createJson());
+                out=encryptString(out);
+                return out;
+            }else{
+                return "false";
+            }
+
+        } else {
+            return "false";
+        }
     }
 
     //------Process Web--------------
@@ -66,13 +95,49 @@ public class ServerThread extends Thread{
         String output="";
         if(request.startsWith("pharmacy:")){
             output=processCreatePharma(request.substring(9,request.length()));
-        }
+        } else if(request.startsWith("clinic:")){
+            output=processCreateClinic(request.substring(7,request.length()));
+        } //else if(request.startsWith("er:")){
+            //output=processCreateEr(request.substring(3,request.length()));
+       // }
         return output;
     }
 
+    private String processCreateClinic(String request){
+        JsonObject jo = Json.createReader(new StringReader(request)).readObject();
+        JsonObject mJo = jo.getJsonObject("manager");
+        JsonObject pJo = jo.getJsonObject("clinic");
+        String name = pJo.getString("name");
+        String phone = pJo.getString("phone");
+        JsonObject lJo = pJo.getJsonObject("location");
+        String street = lJo.getString("street");
+        String city = lJo.getString("city");
+        String state = lJo.getString("state");
+        String zip = lJo.getString("zip");
+        String rooms = pJo.getString("rooms");
+
+        String fName = mJo.getString("fname");
+        String lName = mJo.getString("lname");
+        String email = mJo.getString("email");
+        String user = mJo.getString("username");
+        String pass = mJo.getString("password");
+
+        pass = encryptPassword(pass);
+
+        Practice practice = new Practice(name, street, city, state, zip, phone, user, Integer.parseInt(rooms));
+
+        Staff manager = new Staff(fName, lName, user, pass, email);
+
+        manager.addLocation(practice.getPath(), 2);
+
+        boolean m = manager.createFile();
+        boolean p = practice.createFile();
+
+        return String.valueOf(m && p);
+
+    }
+
     private String processCreatePharma(String request){
-        System.out.println("Request Processing Started");
-        long startTime = System.currentTimeMillis();
         JsonObject jo = Json.createReader(new StringReader(request)).readObject();
         JsonObject mJo = jo.getJsonObject("manager");
         JsonObject pJo = jo.getJsonObject("pharmacy");
@@ -84,52 +149,23 @@ public class ServerThread extends Thread{
         String state = lJo.getString("state");
         String zip = lJo.getString("zip");
 
-        System.out.println(mJo.toString());
-
         String fName = mJo.getString("fname");
         String lName = mJo.getString("lname");
         String email = mJo.getString("email");
         String user = mJo.getString("username");
         String pass = mJo.getString("password");
 
-       /* try {
-            long eTime1 = System.currentTimeMillis();
+        pass = encryptPassword(pass);
 
-            System.out.println("Starting Encryption");
-            BasicPasswordEncryptor passwordEncryptor = new BasicPasswordEncryptor();
-            //BasicTextEncryptor encryptor = new BasicTextEncryptor();
-            System.out.println("Encryptor Created");
-            pass=passwordEncryptor.encryptPassword(pass);
-            //encryptor.setPassword(pass);
-            //System.out.println("Key set");
-            //pass = encryptor.encrypt(pass);
-            System.out.println("Encryption Completed");
-            long eTime2 = System.currentTimeMillis();
-            System.out.println("Encryption time elapsed: "+((eTime2-eTime1)/1000));
-        }catch (Exception e){
-            e.printStackTrace();
-        }*/
-
-        System.out.println("Creating Pharmacy");
         Pharmacy pharmacy = new Pharmacy(name, street, city, state, zip, phone, user);
-        System.out.println("Pharmacy Created");
 
-        System.out.println(pharmacy.getPath());
+        Staff manager = new Staff(fName,lName,user,pass,email);
 
-        System.out.println("Creating Manager");
-        Staff manager = new Staff(lName,fName,user,pass,email);
-        System.out.println("Manager Created");
+        manager.addLocation(pharmacy.getPath(), 1);
 
-        System.out.println(manager.getPath());
-
-        manager.addLocation(pharmacy.getPath());
-
-        System.out.println("File Creation");
         boolean m = manager.createFile();
         boolean p = pharmacy.createFile();
-        System.out.println("Files Created");
-        long endTime = System.currentTimeMillis();
-        System.out.println("Time taken: "+((endTime-startTime)/1000));
+
         return String.valueOf(m && p);
     }
 
@@ -250,6 +286,18 @@ public class ServerThread extends Thread{
 
 
    //--------Encryption Beyond this point--------------------
+
+
+    private String encryptPassword(String pass){
+        try {
+            BasicTextEncryptor encryptor = new BasicTextEncryptor();
+            encryptor.setPassword(pass);
+            pass = encryptor.encrypt(pass);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return pass;
+    }
 
     private String encryptString(String x){
         BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
