@@ -3,12 +3,14 @@ package com.bigmacdev.all_med.model;
 import com.bigmacdev.all_med.controller.Main;
 import net.maritimecloud.internal.core.javax.json.Json;
 import net.maritimecloud.internal.core.javax.json.JsonObject;
+import net.maritimecloud.internal.core.javax.json.JsonObjectBuilder;
 import org.jasypt.util.password.BasicPasswordEncryptor;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.jasypt.util.text.BasicTextEncryptor;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.SplittableRandom;
 
@@ -54,11 +56,41 @@ public class ServerThread extends Thread{
         }else if (input.startsWith("web:")){
             output=processWeb(input.substring(4,input.length()));
         }else if (input.startsWith("pharm:")){
-
+            output=processPharma(input.substring(6, input.length()));
         }else if (input.startsWith("clinic:")){
             output=processClinic(input.substring(7, input.length()));
         }
         return output;
+    }
+    //-----pharma------
+
+    private String processPharma(String s){
+        String output="";
+        if(s.startsWith("login:")){
+            output = processPharmaLogin(s.substring(6, s.length()));
+        }
+        return output;
+    }
+
+
+
+    private String processPharmaLogin(String request){
+        request = decryptString(request);
+        String out = "";
+        if(new File("storage/login/staff/"+request).exists()){
+            Staff staff = new Staff();
+            staff.loadData("storage/login/staff/"+request);
+            if(staff.hasClinics()){
+                out=staff.jsonToString(staff.createJson());
+                out=encryptString(out);
+                return out;
+            }else{
+                return "false";
+            }
+
+        } else {
+            return "false";
+        }
     }
 
 
@@ -67,8 +99,52 @@ public class ServerThread extends Thread{
         String output="";
         if(request.startsWith("login:")){
             output=processClinicLogin(request.substring(6, request.length()));
+        }else if (request.startsWith("updateClinic:")){
+            output=processClinicUpdate(request.substring(13,request.length()));
+        } else if(request.startsWith("updateLogin:")){
+            output=processUpdateStaff(request.substring(12,request.length()));
+        } else if (request.startsWith("getClinic:")){
+            output=processGetClinic(request.substring(10,request.length()));
+        } else if(request.startsWith("scheduleGet:")){
+            output=processGetSchedule(request.substring(12, request.length()));
+        } else if (request.startsWith("makeApp:")){
+            output=processClinicCreateApp(request.substring(8, request.length()));
         }
         return output;
+    }
+
+    private String processClinicCreateApp(String request){
+        request = decryptString(request);
+        Practice clinic = new Practice();
+        boolean b = clinic.createAppointment(Json.createReader(new StringReader(request)).readObject());
+        return String.valueOf(b);
+    }
+
+    private String processGetSchedule(String request){
+        Practice clinic = new Practice();
+        return clinic.getAppointments(Json.createReader(new StringReader(decryptString(request))).readObject());
+    }
+
+    private String processGetClinic(String request){
+        request = decryptString(request);
+        Practice clinic = new Practice();
+        System.out.println(request);
+        clinic.loadFile(request);
+        return encryptString(clinic.jsonToString(clinic.createJson()));
+    }
+
+    private String processUpdateStaff(String request){
+        request=decryptString(request);
+        Staff staff = new Staff();
+        staff.loadData(request);
+        return String.valueOf(staff.createFile());
+    }
+
+    private String processClinicUpdate(String request){
+        request=decryptString(request);
+        Practice clinic = new Practice();
+        clinic.loadData(request);
+        return String.valueOf(clinic.createFile());
     }
 
     private String processClinicLogin(String request){
@@ -188,8 +264,52 @@ public class ServerThread extends Thread{
             output= processGetRecords(patientString);
         } else if(patientString.startsWith("update:")){
             output=processUpdatePatient(patientString.substring(7, patientString.length()));
+        }else if(patientString.equals("clinics")){
+            output=getclinicslist();
+        } else if (patientString.startsWith("access:")){
+            output=giveAccess(patientString.substring(7, patientString.length()));
+        } else if (patientString.startsWith("web")){
+
         }
         return output;
+    }
+
+    private String giveAccess(String s){
+        Patient patient = new Patient();
+        MicroPatient mp = new MicroPatient();
+        String loc = s.substring(s.indexOf(';')+1, s.length());
+        s=s.substring(0, s.indexOf(';'));
+        patient.loadData(patient.getPatientData(s));
+        mp.setDay(patient.getDobD());
+        mp.setFirst(patient.getfName());
+        mp.setLast(patient.getlName());
+        mp.setMonth(patient.getDobM());
+        mp.setYear(patient.getDobY());
+        mp.setPath(patient.getFilePath());
+        File file = new File("storage/data/clinic/"+loc+"/patients/");
+        file.mkdirs();
+        File f = new File("storage/data/clinic/"+loc+"/patients/"+mp.getLast()+"_"+mp.getFirst()+"_"+mp.getYear()+"_"+mp.getMonth()+"_"+mp.getDay()+".txt");
+        try{
+            f.createNewFile();
+            PrintStream out = new PrintStream(new FileOutputStream(f));
+            out.print(mp.toJsonString());
+            out.close();
+            return "true";
+        }catch (Exception e){
+            e.printStackTrace();
+            return "false";
+        }
+
+    }
+
+    private String getclinicslist(){
+        File f = new File("storage/data/clinic");
+        File [] files = f.listFiles();
+        JsonObjectBuilder job = Json.createObjectBuilder();
+        for(int i=0; i<files.length; i++){
+            job.add("file"+i,files[i].getName());
+        }
+        return job.build().toString();
     }
 
     private String processUpdatePatient(String request){

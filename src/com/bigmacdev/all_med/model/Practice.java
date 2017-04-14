@@ -2,11 +2,10 @@ package com.bigmacdev.all_med.model;
 import net.maritimecloud.internal.core.javax.json.Json;
 import net.maritimecloud.internal.core.javax.json.JsonObject;
 import net.maritimecloud.internal.core.javax.json.JsonObjectBuilder;
+import net.maritimecloud.internal.core.javax.json.JsonReader;
 
 import javax.print.DocFlavor;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,12 +37,101 @@ public class Practice {
 
 	public String getPath(){return path;}
 
+	public void loadFile(String loc){
+		JsonObject jo = getData(loc);
+		loadData(jo.toString());
+	}
+
+	public boolean createAppointment(JsonObject jo){
+		String first=jo.getString("first");
+		String last=jo.getString("last");
+		int day=jo.getInt("day");
+		int month=jo.getInt("month");
+		int year=jo.getInt("year");
+		int minute=jo.getInt("minute");
+		int hour=jo.getInt("hour");
+		String cPath = jo.getString("clinicPath");
+		File f = new File(path+"/schedule/"+year+"/"+month+"/"+day);
+		f.mkdirs();
+		try {
+			File file = new File(path + "/schedule/" + year + "/" + month + "/" + day + "/" + hour + "_" + minute + "_" + last + "_" + first + ".txt");
+			file.createNewFile();
+			PrintStream out = new PrintStream(new FileOutputStream(file));
+			out.print(jo.toString());
+			out.close();
+			return true;
+		}catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+
+	public boolean arrived(JsonObject jo){
+		int day = jo.getInt("day");
+		int month = jo.getInt("month");
+		int year = jo.getInt("year");
+		String loc = jo.getString("path");
+		return true;
+	}
+
+	public boolean completed(JsonObject jo){
+		int day = jo.getInt("day");
+		int month = jo.getInt("month");
+		int year = jo.getInt("year");
+		String loc = jo.getString("path");
+		return true;
+	}
+
+	public String getAppointments(JsonObject jo){
+		int day = jo.getInt("day");
+		int month = jo.getInt("month");
+		int year = jo.getInt("year");
+		String loc = jo.getString("path");
+		if(new File(path+"/schedule/"+year+"/"+month+"/"+day).exists()){
+			File[] f = new File(path+"/schedule/"+year+"/"+month+"/"+day).listFiles();
+			JsonObjectBuilder job = Json.createObjectBuilder();
+			for(int i=0; i<f.length; i++){
+				job.add("file"+i,f[i].getName());
+			}
+			return job.build().toString();
+		}else{
+			return "false";
+		}
+	}
+
+	public void loadData(String s){
+		JsonObject jo = Json.createReader(new StringReader(s)).readObject();
+		this.name = jo.getString("name");
+		this.phone=jo.getString("phone");
+		this.manager=jo.getString("manager");
+		this.rooms = jo.getInt("rooms");
+		this.path = jo.getString("path");
+		JsonObject loc = jo.getJsonObject("location");
+		this.address=loc.getString("street");
+		this.city=loc.getString("city");
+		this.state=loc.getString("state");
+		this.zip=loc.getString("zip");
+		if(jo.containsKey("staff")){
+			int i=0;
+			JsonObject sta = jo.getJsonObject("staff");
+			while(true){
+				if(sta.containsKey("staff"+i)){
+					staff.add(sta.getString("staff"+i));
+				}else{
+					break;
+				}
+			}
+		}
+	}
+
 	public JsonObject createJson(){
 		JsonObjectBuilder job = Json.createObjectBuilder();
 		JsonObjectBuilder job2 = Json.createObjectBuilder();
 		JsonObjectBuilder job3 = Json.createObjectBuilder();
 		job.add("name", name);
 		job.add("phone", phone);
+		job.add("path", path);
 		job.add("manager", manager);
 		job.add("path", path);
 		job.add("rooms", rooms);
@@ -65,11 +153,10 @@ public class Practice {
 	public String jsonToString(JsonObject jo){return jo.toString();}
 
 	public boolean createFile(){
-		DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
-		Date date = new Date();
+
 		try{
-			new File(getPath()+"/"+dateFormat.format(date)+".txt").createNewFile();
-			PrintStream out = new PrintStream(new FileOutputStream(getPath()+"/"+dateFormat.format(date)+".txt"));
+			new File(getPath()+"/data.txt").createNewFile();
+			PrintStream out = new PrintStream(new FileOutputStream(getPath()+"/data.txt"));
 			out.print(jsonToString(createJson()));
 			out.close();
 			return true;
@@ -78,4 +165,22 @@ public class Practice {
 			return false;
 		}
 	}
+
+	public JsonObject getData(String loc){
+		loc=loc+"/data.txt";
+		File inputFile = new File(loc);
+		InputStream inputStream;
+		JsonObject out=null;
+		try{
+			inputStream = new FileInputStream(inputFile);
+			JsonReader reader = Json.createReader(inputStream);
+			out = reader.readObject();
+			reader.close();
+			inputStream.close();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return out;
+	}
+
 }
