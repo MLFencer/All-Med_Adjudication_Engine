@@ -45,6 +45,7 @@ public class Practice {
 		job.add("name", name);
 		job.add("phone", phone);
 		job.add("manager", manager);
+		job.add("path", path);
 		job.add("rooms", rooms);
 		job3.add("street", address);
 		job3.add("city", city);
