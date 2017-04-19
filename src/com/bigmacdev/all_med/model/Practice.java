@@ -51,16 +51,18 @@ public class Practice {
 		int minute=jo.getInt("minute");
 		int hour=jo.getInt("hour");
 		String cPath = jo.getString("clinicPath");
-		File f = new File(path+"/schedule/"+year+"/"+month+"/"+day);
-		f.mkdirs();
+		File f = new File(cPath+"/schedule/"+year+"/"+month+"/"+day);
+		System.out.println(f.mkdirs());
 		try {
-			File file = new File(path + "/schedule/" + year + "/" + month + "/" + day + "/" + hour + "_" + minute + "_" + last + "_" + first + ".txt");
-			file.createNewFile();
+			File file = new File(cPath + "/schedule/" + year + "/" + month + "/" + day + "/" + hour + "_" + minute + "_" + last + "_" + first + ".txt");
+			System.out.println(file.createNewFile());
 			PrintStream out = new PrintStream(new FileOutputStream(file));
 			out.print(jo.toString());
 			out.close();
+			System.out.println("done");
 			return true;
 		}catch (Exception e){
+			System.out.println("Failed");
 			e.printStackTrace();
 			return false;
 		}
@@ -88,8 +90,9 @@ public class Practice {
 		int month = jo.getInt("month");
 		int year = jo.getInt("year");
 		String loc = jo.getString("path");
-		if(new File(path+"/schedule/"+year+"/"+month+"/"+day).exists()){
-			File[] f = new File(path+"/schedule/"+year+"/"+month+"/"+day).listFiles();
+		System.out.println("Loc: "+loc);
+		if(new File(loc+"/schedule/"+year+"/"+month+"/"+day).exists()){
+			File[] f = new File(loc+"/schedule/"+year+"/"+month+"/"+day).listFiles();
 			JsonObjectBuilder job = Json.createObjectBuilder();
 			for(int i=0; i<f.length; i++){
 				job.add("file"+i,f[i].getName());
@@ -163,6 +166,19 @@ public class Practice {
 		} catch (Exception e){
 			System.out.println(e);
 			return false;
+		}
+	}
+
+	public String getPatientList(String loc){
+		if(new File(loc+"/patients/").exists()){
+			String out = "";
+			File [] pats = new File(loc+"/patients/").listFiles();
+			for(int i =0; i<pats.length; i++){
+				out=out+pats[i]+";";
+			}
+			return out;
+		}else {
+			return "false";
 		}
 	}
 

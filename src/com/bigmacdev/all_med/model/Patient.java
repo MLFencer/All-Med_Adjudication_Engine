@@ -427,20 +427,25 @@ public class Patient extends Person implements Serializable{
 		File folder = new File(location);
 		File [] listOfFiles = folder.listFiles();
 		String latest=listOfFiles[0].getName();
-		for (int i=1; i<listOfFiles.length; i++){
+		for (int i=1; i<listOfFiles.length; i++) {
 			String nameCurrent = listOfFiles[i].getName();
-			int latestDay = Integer.parseInt(latest.substring(0,8));
-			int currentDay = Integer.parseInt(nameCurrent.substring(0,8));
-			int latestTime = Integer.parseInt(latest.substring(10,15));
-			int currentTime = Integer.parseInt(nameCurrent.substring(10,15));
-			if(latestDay>currentDay){
-			} else if(latestDay<currentDay){
-				latest=nameCurrent;
-			}else if (latestDay==currentDay){
-				if(latestTime>currentTime){
-				}else{
-					latest=nameCurrent;
+			System.out.println(nameCurrent);
+			if (latest.length() > 10 && nameCurrent.length()>10) {
+				int latestDay = Integer.parseInt(latest.substring(0, 8));
+				int currentDay = Integer.parseInt(nameCurrent.substring(0, 8));
+				int latestTime = Integer.parseInt(latest.substring(10, 15));
+				int currentTime = Integer.parseInt(nameCurrent.substring(10, 15));
+				if (latestDay > currentDay) {
+				} else if (latestDay < currentDay) {
+					latest = nameCurrent;
+				} else if (latestDay == currentDay) {
+					if (latestTime > currentTime) {
+					} else {
+						latest = nameCurrent;
+					}
 				}
+			}else {
+				latest=nameCurrent;
 			}
 		}
 		return latest;

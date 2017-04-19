@@ -4,6 +4,7 @@ import com.bigmacdev.all_med.controller.Main;
 import net.maritimecloud.internal.core.javax.json.Json;
 import net.maritimecloud.internal.core.javax.json.JsonObject;
 import net.maritimecloud.internal.core.javax.json.JsonObjectBuilder;
+import net.maritimecloud.internal.core.javax.json.JsonReader;
 import org.jasypt.util.password.BasicPasswordEncryptor;
 import org.jasypt.util.password.PasswordEncryptor;
 import org.jasypt.util.text.BasicTextEncryptor;
@@ -109,8 +110,43 @@ public class ServerThread extends Thread{
             output=processGetSchedule(request.substring(12, request.length()));
         } else if (request.startsWith("makeApp:")){
             output=processClinicCreateApp(request.substring(8, request.length()));
+        } else if (request.startsWith("getPats:")){
+            output=processGetPatients(request.substring(8, request.length()));
+        } else if (request.startsWith("getPatientData:")){
+            output=processClinicGetPatientData(request.substring(15,request.length()));
         }
         return output;
+    }
+
+
+    private String processClinicGetPatientData(String request){
+        request=decryptString(request);
+        String output="";
+        File inputFile = new File(request);
+        InputStream inputStream;
+        JsonObject jo =null;
+        try{
+            inputStream=new FileInputStream(inputFile);
+            JsonReader reader = Json.createReader(inputStream);
+            jo= reader.readObject();
+            reader.close();
+            inputStream.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        request=jo.getString("path");
+        Patient patient = new Patient();
+        output = encryptString(patient.getPatientData(request).toString());
+        System.out.println(output);
+        return encryptString(output);
+    }
+
+    private String processGetPatients(String request){
+        String out="";
+        Practice p = new Practice();
+        request=decryptString(request);
+        out = p.getPatientList(request);
+        return encryptString(out);
     }
 
     private String processClinicCreateApp(String request){
@@ -339,7 +375,7 @@ public class ServerThread extends Thread{
             Patient patient = new Patient();
             output = encryptString(patient.getPatientData(location).toString());
         } catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
             output="false";
         }
         return output;
